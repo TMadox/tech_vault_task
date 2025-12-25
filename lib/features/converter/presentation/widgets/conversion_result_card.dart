@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/extensions/context_extensions.dart';
 import '../../domain/entities/conversion_result.dart';
 
 class ConversionResultCard extends StatelessWidget {
@@ -10,23 +12,32 @@ class ConversionResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
+      color: context.colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.largePadding),
         child: Column(
           children: [
-            Text('${result.amount.toStringAsFixed(2)} ${result.fromCurrency}', style: Theme.of(context).textTheme.titleMedium),
-            Icon(Icons.arrow_downward, color: Theme.of(context).colorScheme.onPrimaryContainer),
+            Text(
+              '${result.amount.toStringAsFixed(2)} ${result.fromCurrency}',
+              style: context.textTheme.titleMedium,
+            ),
+            Icon(
+              Icons.arrow_downward,
+              color: context.colorScheme.onPrimaryContainer,
+            ),
             Text(
               '${result.result.toStringAsFixed(4)} ${result.toCurrency}',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimaryContainer),
+              style: context.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: context.colorScheme.onPrimaryContainer,
+              ),
             ),
             const SizedBox(height: AppConstants.smallPadding),
             Text(
               'Rate: 1 ${result.fromCurrency} = ${result.rate.toStringAsFixed(6)} ${result.toCurrency}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer.withAlpha(179)),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onPrimaryContainer.withAlpha(179),
+              ),
             ),
           ],
         ),

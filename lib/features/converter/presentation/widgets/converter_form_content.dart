@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:task_currency/core/widgets/error_state_widget.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_bloc.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_event.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_state.dart';
-import 'package:task_currency/features/converter/presentation/pages/converter_page.dart';
 import 'package:task_currency/features/converter/presentation/widgets/conversion_result_card.dart';
 import 'package:task_currency/features/converter/presentation/widgets/currency_dropdown.dart';
 import 'package:task_currency/features/currencies/domain/entities/currency.dart';
@@ -109,9 +109,11 @@ class ConverterFormContent extends StatelessWidget {
                 if (state is ConverterLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 if (state is ConverterError) {
-                  return ConverterErrorCard(message: state.message);
+                  return ErrorStateWidget(
+                    title: 'error'.tr(),
+                    message: state.message,
+                  );
                 }
 
                 if (state is ConverterSuccess) {

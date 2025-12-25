@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'features/converter/presentation/pages/converter_page.dart';
@@ -27,21 +28,21 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.currency_exchange_outlined),
             selectedIcon: Icon(Icons.currency_exchange),
-            label: 'Converter',
+            label: 'navigation.converter'.tr(context: context),
           ),
           NavigationDestination(
             icon: Icon(Icons.list_outlined),
             selectedIcon: Icon(Icons.list),
-            label: 'Currencies',
+            label: 'navigation.currencies'.tr(context: context),
           ),
           NavigationDestination(
             icon: Icon(Icons.show_chart_outlined),
             selectedIcon: Icon(Icons.show_chart),
-            label: 'Historical',
+            label: 'navigation.historical'.tr(context: context),
           ),
         ],
       ),

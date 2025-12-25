@@ -14,6 +14,21 @@
         "select_target": "الرجاء اختيار العملة الهدف"
     },
     "error": {
-        "loading_currencies": "خطأ في تحميل العملات"
+        "loading_currencies": "خطأ في تحميل العملات",
+        "loading_data": "خطأ في تحميل البيانات"
+    },
+    "currencies": {
+        "title": "العملات"
+    },
+    "historical": {
+        "title": "الأسعار التاريخية",
+        "no_data": "لا توجد بيانات متاحة",
+        "last_days": "آخر {} يوم",
+        "conversion_title": "{} إلى {}"
+    },
+    "navigation": {
+        "converter": "المحول",
+        "currencies": "العملات",
+        "historical": "التاريخ"
     }
 }

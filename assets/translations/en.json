@@ -14,6 +14,21 @@
         "select_target": "Please select a target currency"
     },
     "error": {
-        "loading_currencies": "Error Loading Currencies"
+        "loading_currencies": "Error Loading Currencies",
+        "loading_data": "Error Loading Data"
+    },
+    "currencies": {
+        "title": "Currencies"
+    },
+    "historical": {
+        "title": "Historical Rates",
+        "no_data": "No data available",
+        "last_days": "Last {} days",
+        "conversion_title": "{} to {}"
+    },
+    "navigation": {
+        "converter": "Converter",
+        "currencies": "Currencies",
+        "historical": "Historical"
     }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/extensions/context_extensions.dart';
 import '../../../currencies/domain/entities/currency.dart';
 
 class CurrencyDropdown extends StatelessWidget {
@@ -27,8 +28,8 @@ class CurrencyDropdown extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          style: context.textTheme.labelLarge?.copyWith(
+            color: context.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: AppConstants.smallPadding),
