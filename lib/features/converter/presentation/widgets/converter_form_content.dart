@@ -2,112 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:task_currency/features/converter/presentation/bloc/converter_bloc.dart';
+import 'package:task_currency/features/converter/presentation/bloc/converter_event.dart';
+import 'package:task_currency/features/converter/presentation/bloc/converter_state.dart';
+import 'package:task_currency/features/converter/presentation/pages/converter_page.dart';
+import 'package:task_currency/features/converter/presentation/widgets/conversion_result_card.dart';
+import 'package:task_currency/features/converter/presentation/widgets/currency_dropdown.dart';
+import 'package:task_currency/features/currencies/domain/entities/currency.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/widgets/error_state_widget.dart';
-import '../../../currencies/domain/entities/currency.dart';
-import '../../../currencies/presentation/bloc/currencies_bloc.dart';
-import '../../../currencies/presentation/bloc/currencies_event.dart';
-import '../../../currencies/presentation/bloc/currencies_state.dart';
-import '../bloc/converter_bloc.dart';
-import '../bloc/converter_event.dart';
-import '../bloc/converter_state.dart';
-import '../widgets/conversion_result_card.dart';
-import '../widgets/currency_dropdown.dart';
-
-class ConverterPage extends StatefulWidget {
-  const ConverterPage({super.key});
-
-  @override
-  State<ConverterPage> createState() => _ConverterPageState();
-}
-
-class _ConverterPageState extends State<ConverterPage> {
-  final _amountController = TextEditingController();
-  final _formKey = GlobalKey<FormBuilderState>();
-
-  @override
-  void initState() {
-    super.initState();
-    final currenciesState = context.read<CurrenciesBloc>().state;
-    if (currenciesState is! CurrenciesLoaded) {
-      context.read<CurrenciesBloc>().add(const LoadCurrencies());
-    }
-  }
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Currency Converter')),
-      body: BlocBuilder<CurrenciesBloc, CurrenciesState>(
-        builder: (context, currenciesState) {
-          if (currenciesState is CurrenciesLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (currenciesState is CurrenciesError) {
-            return ErrorStateWidget(
-              title: 'Error Loading Currencies',
-              message: currenciesState.message,
-              onRetry: () =>
-                  context.read<CurrenciesBloc>().add(const LoadCurrencies()),
-            );
-          }
-
-          if (currenciesState is CurrenciesLoaded) {
-            return ConverterFormContent(
-              currencies: currenciesState.currencies,
-              amountController: _amountController,
-              formKey: _formKey,
-              onFromCurrencyChanged: (currency) =>
-                  context.read<ConverterBloc>().add(const ResetConverter()),
-              onToCurrencyChanged: (currency) =>
-                  context.read<ConverterBloc>().add(const ResetConverter()),
-              onSwapCurrencies: _swapCurrencies,
-              onConvert: _convert,
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
-      ),
-    );
-  }
-
-  void _swapCurrencies() {
-    _formKey.currentState!.save();
-    final currencyFrom = _formKey.currentState!.value['from_currency'];
-    final currencyTo = _formKey.currentState!.value['to_currency'];
-    _formKey.currentState!.patchValue({
-      'from_currency': currencyTo,
-      'to_currency': currencyFrom,
-    });
-
-    context.read<ConverterBloc>().add(const ResetConverter());
-  }
-
-  void _convert() {
-    if (_formKey.currentState!.saveAndValidate()) {
-      final amount = double.parse(_formKey.currentState!.value['amount']);
-      final fromCurrency =
-          _formKey.currentState!.value['from_currency'] as Currency;
-      final toCurrency =
-          _formKey.currentState!.value['to_currency'] as Currency;
-      context.read<ConverterBloc>().add(
-        ConvertCurrencyEvent(
-          fromCurrency: fromCurrency.id,
-          toCurrency: toCurrency.id,
-          amount: amount,
-        ),
-      );
-    }
-  }
-}
 
 class ConverterFormContent extends StatelessWidget {
   final List<Currency> currencies;
@@ -228,39 +131,6 @@ class ConverterFormContent extends StatelessWidget {
 
                 return const SizedBox.shrink();
               },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ConverterErrorCard extends StatelessWidget {
-  final String message;
-
-  const ConverterErrorCard({super.key, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Row(
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-            const SizedBox(width: AppConstants.smallPadding),
-            Expanded(
-              child: Text(
-                message,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onErrorContainer,
-                ),
-              ),
             ),
           ],
         ),

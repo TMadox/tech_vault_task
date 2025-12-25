@@ -5,7 +5,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.4
+  sdk: ^3.10.3
 
 dependencies:
   flutter:
@@ -15,6 +15,9 @@ dependencies:
 
   flutter_bloc: ^9.1.0
   equatable: ^2.0.7
+  flutter_form_builder: ^9.0.0
+  form_builder_extra_fields: ^12.1.0
+  form_builder_validators: ^11.2.0
 
   get_it: ^8.0.3
   injectable: ^2.5.0
@@ -32,6 +35,8 @@ dependencies:
   fl_chart: ^0.70.2
 
   intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
