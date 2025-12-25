@@ -18,11 +18,12 @@ void main() {
 
   group('getCurrencies', () {
     final tCurrenciesResponse = {
-      'results': {
-        'USD': {'currencyName': 'United States Dollar', 'currencySymbol': '\$'},
-        'EUR': {'currencyName': 'Euro', 'currencySymbol': '€'},
-        'KWD': {'currencyName': 'Kuwaiti Dinar', 'currencySymbol': 'KD'},
-      },
+      'result': 'success',
+      'supported_codes': [
+        ['USD', 'United States Dollar'],
+        ['EUR', 'Euro'],
+        ['KWD', 'Kuwaiti Dinar'],
+      ],
     };
 
     test('should return list of CurrencyModel when API call is successful', () async {
@@ -51,13 +52,13 @@ void main() {
       expect(() => dataSource.getCurrencies(), throwsA(isA<ServerException>()));
     });
 
-    test('should throw ServerException when results is null', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => {'results': null});
+    test('should throw ServerException when result is not success', () async {
+      when(() => mockDioClient.get(any())).thenAnswer((_) async => {'result': 'error', 'error-type': 'invalid-key'});
 
       expect(() => dataSource.getCurrencies(), throwsA(isA<ServerException>()));
     });
 
-    test('should correctly extract country code from currency id', () async {
+    test('should correctly extract country code from currency code', () async {
       when(() => mockDioClient.get(any())).thenAnswer((_) async => tCurrenciesResponse);
 
       final result = await dataSource.getCurrencies();

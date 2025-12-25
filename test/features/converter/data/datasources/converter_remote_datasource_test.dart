@@ -21,8 +21,15 @@ void main() {
     const tToCurrency = 'KWD';
     const tAmount = 100.0;
     const tRate = 0.307;
+    const tResult = 30.7;
 
-    final tConversionResponse = {'USD_KWD': tRate};
+    final tConversionResponse = {
+      'result': 'success',
+      'base_code': tFromCurrency,
+      'target_code': tToCurrency,
+      'conversion_rate': tRate,
+      'conversion_result': tResult,
+    };
 
     test('should return ConversionModel when API call is successful', () async {
       when(() => mockDioClient.get(any())).thenAnswer((_) async => tConversionResponse);
@@ -34,7 +41,7 @@ void main() {
       expect(result.toCurrency, tToCurrency);
       expect(result.amount, tAmount);
       expect(result.rate, tRate);
-      expect(result.result, tAmount * tRate);
+      expect(result.result, tResult);
       verify(() => mockDioClient.get(any())).called(1);
     });
 
@@ -44,18 +51,10 @@ void main() {
       expect(() => dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount), throwsA(isA<ServerException>()));
     });
 
-    test('should throw ServerException when rate is not available', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => {'OTHER_PAIR': 1.5});
+    test('should throw ServerException when result is not success', () async {
+      when(() => mockDioClient.get(any())).thenAnswer((_) async => {'result': 'error', 'error-type': 'invalid-key'});
 
       expect(() => dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount), throwsA(isA<ServerException>()));
-    });
-
-    test('should calculate result correctly', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tConversionResponse);
-
-      final result = await dataSource.convertCurrency(tFromCurrency, tToCurrency, 250.0);
-
-      expect(result.result, closeTo(250.0 * tRate, 0.001));
     });
   });
 }

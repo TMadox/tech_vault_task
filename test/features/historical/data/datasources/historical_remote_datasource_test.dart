@@ -22,31 +22,24 @@ void main() {
     final tStartDate = DateTime(2025, 12, 18);
     final tEndDate = DateTime(2025, 12, 25);
 
-    final tHistoricalResponse = {
-      'USD_KWD': {
-        '2025-12-18': 0.306,
-        '2025-12-19': 0.307,
-        '2025-12-20': 0.308,
-        '2025-12-21': 0.307,
-        '2025-12-22': 0.306,
-        '2025-12-23': 0.307,
-        '2025-12-24': 0.308,
-        '2025-12-25': 0.307,
-      },
+    final tLatestResponse = {
+      'result': 'success',
+      'base_code': 'USD',
+      'conversion_rates': {'USD': 1.0, 'KWD': 0.307, 'EUR': 0.92},
     };
 
     test('should return list of HistoricalRateModel when API call is successful', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tHistoricalResponse);
+      when(() => mockDioClient.get(any())).thenAnswer((_) async => tLatestResponse);
 
       final result = await dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate);
 
       expect(result, isA<List<HistoricalRateModel>>());
-      expect(result.length, 8);
+      expect(result.length, 7);
       verify(() => mockDioClient.get(any())).called(1);
     });
 
     test('should return rates sorted by date', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tHistoricalResponse);
+      when(() => mockDioClient.get(any())).thenAnswer((_) async => tLatestResponse);
 
       final result = await dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate);
 
@@ -61,22 +54,26 @@ void main() {
       expect(() => dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate), throwsA(isA<ServerException>()));
     });
 
-    test('should throw ServerException when pair data is not available', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => {'OTHER_PAIR': {}});
+    test('should throw ServerException when target currency not found', () async {
+      when(() => mockDioClient.get(any())).thenAnswer(
+        (_) async => {
+          'result': 'success',
+          'conversion_rates': {'USD': 1.0},
+        },
+      );
 
       expect(() => dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate), throwsA(isA<ServerException>()));
     });
 
-    test('should correctly parse date and rate from response', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tHistoricalResponse);
+    test('should return rates with correct currency codes', () async {
+      when(() => mockDioClient.get(any())).thenAnswer((_) async => tLatestResponse);
 
       final result = await dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate);
 
-      final firstRate = result.first;
-      expect(firstRate.fromCurrency, tFromCurrency);
-      expect(firstRate.toCurrency, tToCurrency);
-      expect(firstRate.date, DateTime(2025, 12, 18));
-      expect(firstRate.rate, 0.306);
+      for (final rate in result) {
+        expect(rate.fromCurrency, tFromCurrency);
+        expect(rate.toCurrency, tToCurrency);
+      }
     });
   });
 }

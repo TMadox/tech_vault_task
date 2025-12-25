@@ -5,13 +5,8 @@ import '../../domain/entities/currency.dart';
 class CurrencyModel extends Currency {
   const CurrencyModel({required super.id, required super.currencyName, super.currencySymbol, super.countryCode});
 
-  factory CurrencyModel.fromJson(String id, Map<String, dynamic> json) {
-    return CurrencyModel(
-      id: id,
-      currencyName: json['currencyName'] as String? ?? '',
-      currencySymbol: json['currencySymbol'] as String?,
-      countryCode: _extractCountryCode(id),
-    );
+  factory CurrencyModel.fromApiResponse(String code, String name) {
+    return CurrencyModel(id: code, currencyName: name, currencySymbol: null, countryCode: _extractCountryCode(code));
   }
 
   factory CurrencyModel.fromTableData(CurrenciesTableData data) {

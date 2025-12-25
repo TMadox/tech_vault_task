@@ -5,37 +5,26 @@ import '../../../../core/network/dio_client.dart';
 import '../models/conversion_model.dart';
 
 abstract class ConverterRemoteDataSource {
-  Future<ConversionModel> convertCurrency(String fromCurrency, String toCurrency, double amount);
+  Future<ConversionModel> convertCurrency(String from, String to, double amount);
 }
 
-@LazySingleton(as: ConverterRemoteDataSource)
+@Injectable(as: ConverterRemoteDataSource)
 class ConverterRemoteDataSourceImpl implements ConverterRemoteDataSource {
   final DioClient _dioClient;
 
   ConverterRemoteDataSourceImpl(this._dioClient);
 
   @override
-  Future<ConversionModel> convertCurrency(String fromCurrency, String toCurrency, double amount) async {
-    try {
-      final url = ApiConstants.getConvertUrl(fromCurrency, toCurrency);
-      final response = await _dioClient.get(url);
+  Future<ConversionModel> convertCurrency(String from, String to, double amount) async {
+    final response = await _dioClient.get(ApiConstants.pairConversion(from, to, amount));
 
-      if (response == null) {
-        throw const ServerException(message: 'Invalid response from server');
-      }
-
-      final pairKey = '${fromCurrency}_$toCurrency';
-      final rate = response[pairKey];
-
-      if (rate == null) {
-        throw const ServerException(message: 'Conversion rate not available');
-      }
-
-      return ConversionModel.fromRate(fromCurrency, toCurrency, amount, (rate as num).toDouble());
-    } on ServerException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(message: 'Failed to convert currency: $e');
+    if (response == null || response['result'] != 'success') {
+      throw ServerException(message: response?['error-type'] ?? 'Conversion failed');
     }
+
+    final rate = (response['conversion_rate'] as num).toDouble();
+    final result = (response['conversion_result'] as num).toDouble();
+
+    return ConversionModel(fromCurrency: from, toCurrency: to, amount: amount, rate: rate, result: result);
   }
 }

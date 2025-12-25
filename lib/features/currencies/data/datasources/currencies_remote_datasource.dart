@@ -8,7 +8,7 @@ abstract class CurrenciesRemoteDataSource {
   Future<List<CurrencyModel>> getCurrencies();
 }
 
-@LazySingleton(as: CurrenciesRemoteDataSource)
+@Injectable(as: CurrenciesRemoteDataSource)
 class CurrenciesRemoteDataSourceImpl implements CurrenciesRemoteDataSource {
   final DioClient _dioClient;
 
@@ -16,21 +16,24 @@ class CurrenciesRemoteDataSourceImpl implements CurrenciesRemoteDataSource {
 
   @override
   Future<List<CurrencyModel>> getCurrencies() async {
-    try {
-      final response = await _dioClient.get(ApiConstants.getCurrenciesUrl());
+    final response = await _dioClient.get(ApiConstants.supportedCodes());
 
-      if (response == null || response['results'] == null) {
-        throw const ServerException(message: 'Invalid response from server');
-      }
-
-      final results = response['results'] as Map<String, dynamic>;
-
-      return results.entries.map((entry) => CurrencyModel.fromJson(entry.key, entry.value as Map<String, dynamic>)).toList()
-        ..sort((a, b) => a.currencyName.compareTo(b.currencyName));
-    } on ServerException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(message: 'Failed to fetch currencies: $e');
+    if (response == null || response['result'] != 'success') {
+      throw ServerException(message: response?['error-type'] ?? 'Failed to fetch currencies');
     }
+
+    final supportedCodes = response['supported_codes'] as List<dynamic>?;
+    if (supportedCodes == null) {
+      throw ServerException(message: 'No currency data received');
+    }
+
+    final currencies = supportedCodes.map((item) {
+      final codeData = item as List<dynamic>;
+      return CurrencyModel.fromApiResponse(codeData[0] as String, codeData[1] as String);
+    }).toList();
+
+    currencies.sort((a, b) => a.currencyName.compareTo(b.currencyName));
+
+    return currencies;
   }
 }

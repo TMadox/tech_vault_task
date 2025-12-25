@@ -64,134 +64,126 @@ class _ConverterPageState extends State<ConverterPage> {
     );
   }
 
-  Widget _buildCurrenciesError(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Text('Error Loading Currencies', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppConstants.smallPadding),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
-            ),
-            const SizedBox(height: AppConstants.largePadding),
-            FilledButton.icon(
-              onPressed: () {
-                context.read<CurrenciesBloc>().add(const LoadCurrencies());
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConverterForm(List<Currency> currencies) {
-    return SingleChildScrollView(
+  Widget _buildCurrenciesError(String message) => Center(
+    child: Padding(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CurrencyDropdown(
-              currencies: currencies,
-              selectedCurrency: _fromCurrency,
-              onChanged: (currency) {
-                setState(() {
-                  _fromCurrency = currency;
-                });
-                context.read<ConverterBloc>().add(const ResetConverter());
-              },
-              label: 'From Currency',
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Center(
-              child: IconButton.filled(onPressed: _swapCurrencies, icon: const Icon(Icons.swap_vert)),
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            CurrencyDropdown(
-              currencies: currencies,
-              selectedCurrency: _toCurrency,
-              onChanged: (currency) {
-                setState(() {
-                  _toCurrency = currency;
-                });
-                context.read<ConverterBloc>().add(const ResetConverter());
-              },
-              label: 'To Currency',
-            ),
-            const SizedBox(height: AppConstants.largePadding),
-            TextFormField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                prefixIcon: const Icon(Icons.attach_money),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConstants.borderRadius)),
-              ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter an amount';
-                }
-                final amount = double.tryParse(value);
-                if (amount == null || amount <= 0) {
-                  return 'Please enter a valid amount';
-                }
-                return null;
-              },
-              onChanged: (_) {
-                context.read<ConverterBloc>().add(const ResetConverter());
-              },
-            ),
-            const SizedBox(height: AppConstants.largePadding),
-            FilledButton.icon(onPressed: _convert, icon: const Icon(Icons.currency_exchange), label: const Text('Convert')),
-            const SizedBox(height: AppConstants.largePadding),
-            BlocBuilder<ConverterBloc, ConverterState>(
-              builder: (context, state) {
-                if (state is ConverterLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (state is ConverterError) {
-                  return Card(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
-                          const SizedBox(width: AppConstants.smallPadding),
-                          Expanded(
-                            child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                if (state is ConverterSuccess) {
-                  return _buildResultCard(state);
-                }
-
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
+          const SizedBox(height: AppConstants.defaultPadding),
+          Text('Error Loading Currencies', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppConstants.smallPadding),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
+          ),
+          const SizedBox(height: AppConstants.largePadding),
+          FilledButton.icon(
+            onPressed: () => context.read<CurrenciesBloc>().add(const LoadCurrencies()),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+
+  Widget _buildConverterForm(List<Currency> currencies) => SingleChildScrollView(
+    padding: const EdgeInsets.all(AppConstants.defaultPadding),
+    child: Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CurrencyDropdown(
+            currencies: currencies,
+            selectedCurrency: _fromCurrency,
+            onChanged: (currency) {
+              setState(() => _fromCurrency = currency);
+              context.read<ConverterBloc>().add(const ResetConverter());
+            },
+            label: 'From Currency',
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          Center(
+            child: IconButton.filled(onPressed: _swapCurrencies, icon: const Icon(Icons.swap_vert)),
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          CurrencyDropdown(
+            currencies: currencies,
+            selectedCurrency: _toCurrency,
+            onChanged: (currency) {
+              setState(() {
+                _toCurrency = currency;
+              });
+              context.read<ConverterBloc>().add(const ResetConverter());
+            },
+            label: 'To Currency',
+          ),
+          const SizedBox(height: AppConstants.largePadding),
+          TextFormField(
+            controller: _amountController,
+            decoration: InputDecoration(
+              labelText: 'Amount',
+              prefixIcon: const Icon(Icons.attach_money),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConstants.borderRadius)),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter an amount';
+              }
+              final amount = double.tryParse(value);
+              if (amount == null || amount <= 0) {
+                return 'Please enter a valid amount';
+              }
+              return null;
+            },
+            onChanged: (_) {
+              context.read<ConverterBloc>().add(const ResetConverter());
+            },
+          ),
+          const SizedBox(height: AppConstants.largePadding),
+          FilledButton.icon(onPressed: _convert, icon: const Icon(Icons.currency_exchange), label: const Text('Convert')),
+          const SizedBox(height: AppConstants.largePadding),
+          BlocBuilder<ConverterBloc, ConverterState>(
+            builder: (context, state) {
+              if (state is ConverterLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is ConverterError) {
+                return Card(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
+                        const SizedBox(width: AppConstants.smallPadding),
+                        Expanded(
+                          child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              if (state is ConverterSuccess) {
+                return _buildResultCard(state);
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _buildResultCard(ConverterSuccess state) {
     final result = state.result;
