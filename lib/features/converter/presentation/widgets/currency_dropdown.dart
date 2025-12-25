@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/widgets/app_image_loader.dart';
 import '../../../currencies/domain/entities/currency.dart';
 
 class CurrencyDropdown extends StatelessWidget {
@@ -110,25 +110,25 @@ class CurrencyDropdown extends StatelessWidget {
         child: const Icon(Icons.flag, size: 12),
       );
     }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: CachedNetworkImage(
-        imageUrl: AppConstants.getFlagUrl(currency.countryCode!),
+    return AppImageLoader(
+      imageUrl: AppConstants.getFlagUrl(currency.countryCode!),
+      width: 24,
+      height: 18,
+      fit: BoxFit.cover,
+      borderRadius: 2,
+      placeholder: Container(
         width: 24,
         height: 18,
-        fit: BoxFit.cover,
-        placeholder: (context, url) =>
-            Container(width: 24, height: 18, color: Colors.grey.shade200),
-        errorWidget: (context, url, error) => Container(
-          width: 24,
-          height: 18,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: const Icon(Icons.flag, size: 12),
+        color: Colors.grey.shade200,
+      ),
+      errorWidget: Container(
+        width: 24,
+        height: 18,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(2),
         ),
+        child: const Icon(Icons.flag, size: 12),
       ),
     );
   }

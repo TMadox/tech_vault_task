@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/widgets/app_image_loader.dart';
 import '../../domain/entities/currency.dart';
 
 class CurrencyListTile extends StatelessWidget {
@@ -68,34 +68,32 @@ class CurrencyListTile extends StatelessWidget {
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: CachedNetworkImage(
-        imageUrl: AppConstants.getFlagUrl(currency.countryCode!),
+    return AppImageLoader(
+      imageUrl: AppConstants.getFlagUrl(currency.countryCode!),
+      width: AppConstants.flagWidth,
+      height: AppConstants.flagHeight,
+      fit: BoxFit.cover,
+      borderRadius: 4,
+      placeholder: Container(
         width: AppConstants.flagWidth,
         height: AppConstants.flagHeight,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          width: AppConstants.flagWidth,
-          height: AppConstants.flagHeight,
+        color: Colors.grey.shade200,
+        child: const Center(
+          child: SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      errorWidget: Container(
+        width: AppConstants.flagWidth,
+        height: AppConstants.flagHeight,
+        decoration: BoxDecoration(
           color: Colors.grey.shade200,
-          child: const Center(
-            child: SizedBox(
-              width: 12,
-              height: 12,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
+          borderRadius: BorderRadius.circular(4),
         ),
-        errorWidget: (context, url, error) => Container(
-          width: AppConstants.flagWidth,
-          height: AppConstants.flagHeight,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Icon(Icons.flag, size: 16),
-        ),
+        child: const Icon(Icons.flag, size: 16),
       ),
     );
   }
