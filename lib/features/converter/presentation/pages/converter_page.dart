@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,7 +45,7 @@ class _ConverterPageState extends State<ConverterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Currency Converter')),
+      appBar: AppBar(title: Text('converter.title'.tr())),
       body: BlocBuilder<CurrenciesBloc, CurrenciesState>(
         builder: (context, currenciesState) {
           if (currenciesState is CurrenciesLoading) {
@@ -52,7 +53,7 @@ class _ConverterPageState extends State<ConverterPage> {
           }
           if (currenciesState is CurrenciesError) {
             return ErrorStateWidget(
-              title: 'Error Loading Currencies',
+              title: 'error.loading_currencies'.tr(),
               message: currenciesState.message,
               onRetry: () =>
                   context.read<CurrenciesBloc>().add(const LoadCurrencies()),
@@ -64,12 +65,12 @@ class _ConverterPageState extends State<ConverterPage> {
               currencies: currenciesState.currencies,
               amountController: _amountController,
               formKey: _formKey,
+              onConvert: _convert,
+              onSwapCurrencies: _swapCurrencies,
               onFromCurrencyChanged: (currency) =>
                   context.read<ConverterBloc>().add(const ResetConverter()),
               onToCurrencyChanged: (currency) =>
                   context.read<ConverterBloc>().add(const ResetConverter()),
-              onSwapCurrencies: _swapCurrencies,
-              onConvert: _convert,
             );
           }
 
@@ -193,12 +194,28 @@ class ConverterFormContent extends StatelessWidget {
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
               ],
               validator: (value) {
+                if (formKey.currentState?.fields['from_currency']?.value ==
+                    null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('validation.select_source'.tr())),
+                  );
+                  return 'validation.select_source'.tr();
+                }
+
+                if (formKey.currentState?.fields['to_currency']?.value ==
+                    null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('validation.select_target'.tr())),
+                  );
+                  return 'validation.select_target'.tr();
+                }
+
                 if (value == null || value.isEmpty) {
-                  return 'Please enter an amount';
+                  return 'validation.enter_amount'.tr();
                 }
                 final amount = double.tryParse(value);
                 if (amount == null || amount <= 0) {
-                  return 'Please enter a valid amount';
+                  return 'validation.valid_amount'.tr();
                 }
                 return null;
               },

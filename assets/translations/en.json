@@ -1,0 +1,19 @@
+{
+    "converter": {
+        "title": "Currency Converter",
+        "from_currency": "From Currency",
+        "to_currency": "To Currency",
+        "amount": "Amount",
+        "convert": "Convert",
+        "search_hint": "Search currency..."
+    },
+    "validation": {
+        "enter_amount": "Please enter an amount",
+        "valid_amount": "Please enter a valid amount",
+        "select_source": "Please select a source currency",
+        "select_target": "Please select a target currency"
+    },
+    "error": {
+        "loading_currencies": "Error Loading Currencies"
+    }
+}

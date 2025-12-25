@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_bloc.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_event.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_state.dart';
@@ -45,15 +47,8 @@ class ConverterFormContent extends StatelessWidget {
             CurrencyDropdown(
               currencies: currencies,
               name: 'from_currency',
-              onChanged: (currency) {
-                // Schedule state update to avoid "widget tree locked" errors
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (context.mounted) {
-                    onFromCurrencyChanged(currency);
-                  }
-                });
-              },
-              label: 'From Currency',
+              onChanged: (currency) => onFromCurrencyChanged(currency),
+              label: 'converter.from_currency'.tr(),
             ),
             const SizedBox(height: AppConstants.defaultPadding),
             Center(
@@ -66,22 +61,15 @@ class ConverterFormContent extends StatelessWidget {
             CurrencyDropdown(
               currencies: currencies,
               name: 'to_currency',
-              onChanged: (currency) {
-                // Schedule state update to avoid "widget tree locked" errors
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (context.mounted) {
-                    onToCurrencyChanged(currency);
-                  }
-                });
-              },
-              label: 'To Currency',
+              onChanged: (currency) => onToCurrencyChanged(currency),
+              label: 'converter.to_currency'.tr(),
             ),
             const SizedBox(height: AppConstants.largePadding),
             FormBuilderTextField(
               name: 'amount',
               controller: amountController,
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: 'converter.amount'.tr(),
                 prefixIcon: const Icon(Icons.attach_money),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
@@ -95,16 +83,17 @@ class ConverterFormContent extends StatelessWidget {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
               ],
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter an amount';
-                }
-                final amount = double.tryParse(value);
-                if (amount == null || amount <= 0) {
-                  return 'Please enter a valid amount';
-                }
-                return null;
-              },
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(
+                  errorText: 'validation.enter_amount'.tr(),
+                ),
+                FormBuilderValidators.numeric(
+                  errorText: 'validation.valid_amount'.tr(),
+                ),
+                FormBuilderValidators.notZeroNumber(
+                  errorText: 'validation.valid_amount'.tr(),
+                ),
+              ]),
               onChanged: (_) =>
                   context.read<ConverterBloc>().add(const ResetConverter()),
             ),
@@ -112,7 +101,7 @@ class ConverterFormContent extends StatelessWidget {
             FilledButton.icon(
               onPressed: onConvert,
               icon: const Icon(Icons.currency_exchange),
-              label: const Text('Convert'),
+              label: Text('converter.convert'.tr()),
             ),
             const SizedBox(height: AppConstants.largePadding),
             BlocBuilder<ConverterBloc, ConverterState>(

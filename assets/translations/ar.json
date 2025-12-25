@@ -1,0 +1,19 @@
+{
+    "converter": {
+        "title": "محول العملات",
+        "from_currency": "من عملة",
+        "to_currency": "إلى عملة",
+        "amount": "المبلغ",
+        "convert": "تحويل",
+        "search_hint": "بحث عن عملة..."
+    },
+    "validation": {
+        "enter_amount": "الرجاء إدخال المبلغ",
+        "valid_amount": "الرجاء إدخال مبلغ صحيح",
+        "select_source": "الرجاء اختيار العملة المصدر",
+        "select_target": "الرجاء اختيار العملة الهدف"
+    },
+    "error": {
+        "loading_currencies": "خطأ في تحميل العملات"
+    }
+}

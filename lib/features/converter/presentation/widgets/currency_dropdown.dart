@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
@@ -48,33 +49,31 @@ class CurrencyDropdown extends StatelessWidget {
           ),
           popupProps: PopupProps.menu(
             showSearchBox: true,
-            searchFieldProps: const TextFieldProps(
+            searchFieldProps: TextFieldProps(
               decoration: InputDecoration(
-                hintText: 'Search currency...',
-                prefixIcon: Icon(Icons.search),
+                hintText: 'converter.search_hint'.tr(),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
-            itemBuilder: (context, currency, isDisabled, isSelected) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.defaultPadding,
-                  vertical: AppConstants.smallPadding,
-                ),
-                child: Row(
-                  children: [
-                    _buildFlag(currency),
-                    const SizedBox(width: AppConstants.smallPadding),
-                    Expanded(
-                      child: Text(
-                        '${currency.id} - ${currency.currencyName}',
-                        overflow: TextOverflow.ellipsis,
-                      ),
+            itemBuilder: (context, currency, isDisabled, isSelected) => Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.defaultPadding,
+                vertical: AppConstants.smallPadding,
+              ),
+              child: Row(
+                children: [
+                  _buildFlag(currency),
+                  const SizedBox(width: AppConstants.smallPadding),
+                  Expanded(
+                    child: Text(
+                      '${currency.id} - ${currency.currencyName}',
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (isSelected) const Icon(Icons.check, size: 16),
-                  ],
-                ),
-              );
-            },
+                  ),
+                  if (isSelected) const Icon(Icons.check, size: 16),
+                ],
+              ),
+            ),
           ),
           dropdownBuilder: (context, currency) {
             if (currency == null) {

@@ -20,7 +20,8 @@ abstract class AppConstants {
   static const double flagWidth = 32.0;
   static const double flagHeight = 24.0;
 
-  static String getFlagUrl(String countryCode) => 'https://flagcdn.com/w80/${countryCode.toLowerCase()}.png';
+  static String getFlagUrl(String countryCode) =>
+      'https://flagcdn.com/w80/${countryCode.toLowerCase()}.png';
 }
 
 abstract class AppColors {

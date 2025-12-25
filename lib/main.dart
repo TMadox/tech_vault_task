@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
 import 'package:task_currency/shell.dart';
 
@@ -13,8 +13,17 @@ import 'features/historical/presentation/bloc/historical_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   await configureDependencies();
-  runApp(const CurrencyConverterApp());
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('ar')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: const CurrencyConverterApp(),
+    ),
+  );
 }
 
 class CurrencyConverterApp extends StatelessWidget {
@@ -32,12 +41,11 @@ class CurrencyConverterApp extends StatelessWidget {
         title: AppConstants.appName,
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: context.localizationDelegates
+          ..addAll([FormBuilderLocalizations.delegate]),
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
         home: const MainNavigation(),
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          FormBuilderLocalizations.delegate,
-        ],
       ),
     );
   }
