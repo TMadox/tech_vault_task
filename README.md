@@ -44,7 +44,7 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-4. **Add your API key**: Open `lib/core/constants/api_constants.dart` and replace `YOUR_API_KEY_HERE` with your free API key from [free.currencyconverterapi.com](https://free.currencyconverterapi.com/)
+4. The API key is already configured. If you need to use your own, edit `lib/core/constants/api_constants.dart`
 
 5. Run the app:
 
@@ -150,11 +150,13 @@ lib/
 
 ## API
 
-This app uses the [Free Currency Converter API](https://free.currencyconverterapi.com/):
+This app uses the [ExchangeRate-API](https://www.exchangerate-api.com/):
 
-- **Currencies List**: `/api/v7/currencies`
-- **Conversion**: `/api/v7/convert?q=USD_KWD&compact=ultra`
-- **Historical**: `/api/v7/convert?q=USD_KWD&date=YYYY-MM-DD&endDate=YYYY-MM-DD`
+- **Supported Currencies**: `/v6/{API_KEY}/codes`
+- **Latest Rates**: `/v6/{API_KEY}/latest/{BASE}`
+- **Pair Conversion**: `/v6/{API_KEY}/pair/{FROM}/{TO}/{AMOUNT}`
+
+> **Note**: Historical data endpoint requires a paid plan. The free plan uses simulated historical data based on current rates.
 
 ## Testing
 
