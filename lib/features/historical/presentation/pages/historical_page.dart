@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/error_state_widget.dart';
 import '../bloc/historical_bloc.dart';
 import '../bloc/historical_event.dart';
 import '../bloc/historical_state.dart';
@@ -31,7 +31,11 @@ class _HistoricalPageState extends State<HistoricalPage> {
           }
 
           if (state is HistoricalError) {
-            return _buildErrorState(state.message);
+            return ErrorStateWidget(
+              title: 'Error Loading Data',
+              message: state.message,
+              onRetry: () => context.read<HistoricalBloc>().add(const LoadHistoricalRates()),
+            );
           }
 
           if (state is HistoricalLoaded) {
@@ -40,36 +44,6 @@ class _HistoricalPageState extends State<HistoricalPage> {
 
           return const SizedBox.shrink();
         },
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Text('Error Loading Data', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppConstants.smallPadding),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
-            ),
-            const SizedBox(height: AppConstants.largePadding),
-            FilledButton.icon(
-              onPressed: () {
-                context.read<HistoricalBloc>().add(const LoadHistoricalRates());
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
       ),
     );
   }

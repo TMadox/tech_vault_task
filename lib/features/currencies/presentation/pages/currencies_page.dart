@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/error_state_widget.dart';
 import '../bloc/currencies_bloc.dart';
 import '../bloc/currencies_event.dart';
 import '../bloc/currencies_state.dart';
@@ -31,11 +32,15 @@ class _CurrenciesPageState extends State<CurrenciesPage> {
           }
 
           if (state is CurrenciesError) {
-            return _buildErrorState(state.message);
+            return ErrorStateWidget(
+              title: 'Error Loading Currencies',
+              message: state.message,
+              onRetry: () => context.read<CurrenciesBloc>().add(const LoadCurrencies()),
+            );
           }
 
           if (state is CurrenciesLoaded) {
-            return _buildCurrenciesList(state);
+            return CurrenciesListView(currencies: state.currencies);
           }
 
           return const SizedBox.shrink();
@@ -43,47 +48,24 @@ class _CurrenciesPageState extends State<CurrenciesPage> {
       ),
     );
   }
+}
 
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Text('Error Loading Currencies', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppConstants.smallPadding),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
-            ),
-            const SizedBox(height: AppConstants.largePadding),
-            FilledButton.icon(
-              onPressed: () {
-                context.read<CurrenciesBloc>().add(const LoadCurrencies());
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class CurrenciesListView extends StatelessWidget {
+  final List currencies;
 
-  Widget _buildCurrenciesList(CurrenciesLoaded state) {
+  const CurrenciesListView({super.key, required this.currencies});
+
+  @override
+  Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
         context.read<CurrenciesBloc>().add(const LoadCurrencies());
       },
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: AppConstants.smallPadding),
-        itemCount: state.currencies.length,
+        itemCount: currencies.length,
         itemBuilder: (context, index) {
-          final currency = state.currencies[index];
+          final currency = currencies[index];
           return CurrencyListTile(currency: currency);
         },
       ),
