@@ -15,7 +15,11 @@
     },
     "error": {
         "loading_currencies": "Error Loading Currencies",
-        "loading_data": "Error Loading Data"
+        "loading_data": "Error Loading Data",
+        "connection_timeout": "Connection timeout. Please try again.",
+        "server_error": "Server error occurred",
+        "no_internet": "No internet connection",
+        "unknown_error": "Unknown error occurred"
     },
     "currencies": {
         "title": "Currencies"

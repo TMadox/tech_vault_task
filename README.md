@@ -38,13 +38,17 @@ cd task_currency
 flutter pub get
 ```
 
-3. Generate code (Drift database and Injectable DI):
+3. Create the `.env` file with the API key:
+
+```bash
+echo "API_KEY=14b41a91b6614f960222aaf2" > .env
+```
+
+4. Generate code (Drift database, Injectable DI, and Envied):
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
-
-4. The API key is already configured. If you need to use your own, edit `lib/core/constants/api_constants.dart`
 
 5. Run the app:
 
@@ -160,6 +164,21 @@ This app uses the [ExchangeRate-API](https://www.exchangerate-api.com/):
 
 > **Note**: Historical data endpoint requires a paid plan. The free plan uses simulated historical data based on current rates.
 
+### API Key Security
+
+The API key is managed using the `envied` package for security:
+
+- The key is stored in `.env` (gitignored, not pushed to version control)
+- At compile time, the key is obfuscated using XOR encryption
+- Since we are not using CI/CD, the API key is: `14b41a91b6614f960222aaf2`
+
+To set up locally:
+
+```bash
+echo "API_KEY=14b41a91b6614f960222aaf2" > .env
+dart run build_runner build --delete-conflicting-outputs
+```
+
 ## Testing
 
 Unit tests are provided for:
@@ -188,6 +207,7 @@ flutter test test/features/currencies/presentation/bloc/currencies_bloc_test.dar
 | get_it + injectable   | Dependency injection                 |
 | drift + drift_flutter | Local database                       |
 | dio                   | HTTP client                          |
+| envied                | Secure API key management            |
 | extended_image        | Flag images with caching             |
 | fl_chart              | Historical data visualization        |
 | dartz                 | Functional programming (Either type) |

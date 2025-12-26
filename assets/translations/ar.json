@@ -15,7 +15,11 @@
     },
     "error": {
         "loading_currencies": "خطأ في تحميل العملات",
-        "loading_data": "خطأ في تحميل البيانات"
+        "loading_data": "خطأ في تحميل البيانات",
+        "connection_timeout": "انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى.",
+        "server_error": "حدث خطأ في الخادم",
+        "no_internet": "لا يوجد اتصال بالإنترنت",
+        "unknown_error": "حدث خطأ غير معروف"
     },
     "currencies": {
         "title": "العملات"
