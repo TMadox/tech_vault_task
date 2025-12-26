@@ -57,20 +57,20 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     gh.lazySingleton<_i982.AppDatabase>(() => _i982.AppDatabase());
     gh.lazySingleton<_i667.DioClient>(() => _i667.DioClient());
-    gh.lazySingleton<_i816.CurrenciesRemoteDataSource>(
+    gh.factory<_i816.CurrenciesRemoteDataSource>(
       () => _i816.CurrenciesRemoteDataSourceImpl(gh<_i667.DioClient>()),
     );
     gh.lazySingleton<_i383.CurrenciesLocalDataSource>(
       () => _i383.CurrenciesLocalDataSourceImpl(gh<_i982.AppDatabase>()),
     );
-    gh.lazySingleton<_i405.ConverterRemoteDataSource>(
+    gh.factory<_i405.ConverterRemoteDataSource>(
       () => _i405.ConverterRemoteDataSourceImpl(gh<_i667.DioClient>()),
     );
     gh.lazySingleton<_i908.ConverterRepository>(
       () =>
           _i516.ConverterRepositoryImpl(gh<_i405.ConverterRemoteDataSource>()),
     );
-    gh.lazySingleton<_i605.HistoricalRemoteDataSource>(
+    gh.factory<_i605.HistoricalRemoteDataSource>(
       () => _i605.HistoricalRemoteDataSourceImpl(gh<_i667.DioClient>()),
     );
     gh.lazySingleton<_i359.HistoricalLocalDataSource>(
