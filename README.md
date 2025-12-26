@@ -109,15 +109,17 @@ lib/
 
 ## Image Loader Library
 
-### Library: cached_network_image
+### Library: extended_image
 
 **Justification:**
 
-1. **Automatic Caching**: Images are cached on disk, reducing network requests and improving performance
-2. **Placeholder Support**: Shows loading indicator while fetching flags
-3. **Error Handling**: Displays fallback widget when flag is unavailable
-4. **Memory Efficient**: Uses LRU cache to manage memory usage
-5. **Production Ready**: Widely used package with excellent community support
+1. **Built-in Caching**: Network images are automatically cached with `cache: true`, reducing network requests and improving performance
+2. **Comprehensive Load State Handling**: Provides `loadStateChanged` callback with explicit states (`loading`, `completed`, `failed`) for precise UI control
+3. **Placeholder Support**: Easy to show custom loading indicators while fetching images
+4. **Error Handling**: Simple pattern matching to display fallback widgets when images fail to load
+5. **Memory Efficient**: Uses optimized memory management for image data
+6. **Advanced Features**: Supports gestures (zoom, pan), image editing, and sliding page gallery out-of-the-box when needed
+7. **Lightweight**: Minimal dependencies compared to alternatives
 
 ## Database
 
@@ -186,11 +188,12 @@ flutter test test/features/currencies/presentation/bloc/currencies_bloc_test.dar
 | get_it + injectable   | Dependency injection                 |
 | drift + drift_flutter | Local database                       |
 | dio                   | HTTP client                          |
-| cached_network_image  | Flag images with caching             |
+| extended_image        | Flag images with caching             |
 | fl_chart              | Historical data visualization        |
 | dartz                 | Functional programming (Either type) |
 | mocktail              | Mocking for tests                    |
 | bloc_test             | BLoC testing utilities               |
+| http_mock_adapter     | API integration testing              |
 
 ## License
 
