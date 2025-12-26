@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:task_currency/core/constants/api_constants.dart';
 import 'package:task_currency/core/error/exceptions.dart';
-import 'package:task_currency/core/network/dio_client.dart';
 import 'package:task_currency/features/converter/data/datasources/converter_remote_datasource.dart';
 import 'package:task_currency/features/converter/data/models/conversion_model.dart';
 
-class MockDioClient extends Mock implements DioClient {}
+import '../../../../mocks.dart';
 
 void main() {
   late ConverterRemoteDataSourceImpl dataSource;
@@ -16,45 +16,93 @@ void main() {
     dataSource = ConverterRemoteDataSourceImpl(mockDioClient);
   });
 
-  group('convertCurrency', () {
+  group('ConverterRemoteDataSourceImpl', () {
     const tFromCurrency = 'USD';
-    const tToCurrency = 'KWD';
+    const tToCurrency = 'EUR';
     const tAmount = 100.0;
-    const tRate = 0.307;
-    const tResult = 30.7;
+    const tRate = 0.85;
+    const tConversionResult = 85.0;
 
-    final tConversionResponse = {
+    final tSuccessResponse = {
       'result': 'success',
-      'base_code': tFromCurrency,
-      'target_code': tToCurrency,
       'conversion_rate': tRate,
-      'conversion_result': tResult,
+      'conversion_result': tConversionResult,
     };
 
-    test('should return ConversionModel when API call is successful', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tConversionResponse);
+    group('convertCurrency', () {
+      test('should return ConversionModel when API call succeeds', () async {
+        when(
+          () => mockDioClient.get(
+            ApiConstants.pairConversion(tFromCurrency, tToCurrency, tAmount),
+          ),
+        ).thenAnswer((_) async => tSuccessResponse);
 
-      final result = await dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount);
+        final result = await dataSource.convertCurrency(
+          tFromCurrency,
+          tToCurrency,
+          tAmount,
+        );
 
-      expect(result, isA<ConversionModel>());
-      expect(result.fromCurrency, tFromCurrency);
-      expect(result.toCurrency, tToCurrency);
-      expect(result.amount, tAmount);
-      expect(result.rate, tRate);
-      expect(result.result, tResult);
-      verify(() => mockDioClient.get(any())).called(1);
-    });
+        expect(result, isA<ConversionModel>());
+        expect(result.fromCurrency, equals(tFromCurrency));
+        expect(result.toCurrency, equals(tToCurrency));
+        expect(result.amount, equals(tAmount));
+        expect(result.rate, equals(tRate));
+        expect(result.result, equals(tConversionResult));
+      });
 
-    test('should throw ServerException when response is null', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => null);
+      test(
+        'should throw ServerException when API returns error result',
+        () async {
+          when(
+            () => mockDioClient.get(
+              ApiConstants.pairConversion(tFromCurrency, tToCurrency, tAmount),
+            ),
+          ).thenAnswer(
+            (_) async => {'result': 'error', 'error-type': 'invalid-key'},
+          );
 
-      expect(() => dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount), throwsA(isA<ServerException>()));
-    });
+          expect(
+            () =>
+                dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount),
+            throwsA(isA<ServerException>()),
+          );
+        },
+      );
 
-    test('should throw ServerException when result is not success', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => {'result': 'error', 'error-type': 'invalid-key'});
+      test('should throw ServerException when API returns null', () async {
+        when(
+          () => mockDioClient.get(
+            ApiConstants.pairConversion(tFromCurrency, tToCurrency, tAmount),
+          ),
+        ).thenAnswer((_) async => null);
 
-      expect(() => dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount), throwsA(isA<ServerException>()));
+        expect(
+          () => dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount),
+          throwsA(isA<ServerException>()),
+        );
+      });
+
+      test(
+        'should throw ServerException with default message when error-type is missing',
+        () async {
+          when(
+            () => mockDioClient.get(
+              ApiConstants.pairConversion(tFromCurrency, tToCurrency, tAmount),
+            ),
+          ).thenAnswer((_) async => {'result': 'error'});
+
+          expect(
+            () =>
+                dataSource.convertCurrency(tFromCurrency, tToCurrency, tAmount),
+            throwsA(
+              predicate<ServerException>(
+                (e) => e.message == 'Conversion failed',
+              ),
+            ),
+          );
+        },
+      );
     });
   });
 }

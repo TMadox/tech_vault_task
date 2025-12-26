@@ -20,7 +20,6 @@ class ConverterPage extends StatefulWidget {
 }
 
 class _ConverterPageState extends State<ConverterPage> {
-  final _amountController = TextEditingController();
   final _formKey = GlobalKey<FormBuilderState>();
 
   @override
@@ -30,12 +29,6 @@ class _ConverterPageState extends State<ConverterPage> {
     if (currenciesState is! CurrenciesLoaded) {
       context.read<CurrenciesBloc>().add(const LoadCurrencies());
     }
-  }
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    super.dispose();
   }
 
   @override
@@ -75,7 +68,6 @@ class _ConverterPageState extends State<ConverterPage> {
               formKey: _formKey,
               onConvert: _convert,
               onSwapCurrencies: _swapCurrencies,
-              amountController: _amountController,
               currencies: currenciesState.currencies,
               onFromCurrencyChanged: (currency) =>
                   context.read<ConverterBloc>().add(const ResetConverter()),

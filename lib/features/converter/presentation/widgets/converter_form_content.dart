@@ -16,7 +16,6 @@ import '../../../../core/constants/app_constants.dart';
 
 class ConverterFormContent extends StatelessWidget {
   final List<Currency> currencies;
-  final TextEditingController amountController;
   final GlobalKey<FormBuilderState> formKey;
 
   final ValueChanged<Currency?> onFromCurrencyChanged;
@@ -27,7 +26,6 @@ class ConverterFormContent extends StatelessWidget {
   const ConverterFormContent({
     super.key,
     required this.currencies,
-    required this.amountController,
     required this.formKey,
     required this.onFromCurrencyChanged,
     required this.onToCurrencyChanged,
@@ -67,7 +65,6 @@ class ConverterFormContent extends StatelessWidget {
             const SizedBox(height: AppConstants.largePadding),
             FormBuilderTextField(
               name: 'amount',
-              controller: amountController,
               decoration: InputDecoration(
                 labelText: 'converter.amount'.tr(),
                 prefixIcon: const Icon(Icons.attach_money),

@@ -4,51 +4,62 @@ import 'package:mocktail/mocktail.dart';
 import 'package:task_currency/core/error/failures.dart';
 import 'package:task_currency/core/usecases/usecase.dart';
 import 'package:task_currency/features/currencies/domain/entities/currency.dart';
-import 'package:task_currency/features/currencies/domain/repositories/currencies_repository.dart';
 import 'package:task_currency/features/currencies/domain/usecases/get_currencies.dart';
 
-class MockCurrenciesRepository extends Mock implements CurrenciesRepository {}
+import '../../../../mocks.dart';
 
 void main() {
-  late GetCurrencies useCase;
+  late GetCurrencies usecase;
   late MockCurrenciesRepository mockRepository;
 
   setUp(() {
     mockRepository = MockCurrenciesRepository();
-    useCase = GetCurrencies(mockRepository);
+    usecase = GetCurrencies(mockRepository);
   });
 
-  final tCurrencies = [
-    const Currency(id: 'USD', currencyName: 'United States Dollar', currencySymbol: '\$', countryCode: 'us'),
-    const Currency(id: 'EUR', currencyName: 'Euro', currencySymbol: '€', countryCode: 'eu'),
-  ];
+  group('GetCurrencies', () {
+    const tCurrencies = [
+      Currency(id: 'USD', currencyName: 'United States Dollar'),
+      Currency(id: 'EUR', currencyName: 'Euro'),
+      Currency(id: 'GBP', currencyName: 'British Pound'),
+    ];
 
-  test('should get currencies from the repository', () async {
-    when(() => mockRepository.getCurrencies()).thenAnswer((_) async => Right(tCurrencies));
+    test(
+      'should return list of currencies when repository call succeeds',
+      () async {
+        when(
+          () => mockRepository.getCurrencies(),
+        ).thenAnswer((_) async => const Right(tCurrencies));
 
-    final result = await useCase(const NoParams());
+        final result = await usecase(const NoParams());
 
-    expect(result, Right(tCurrencies));
-    verify(() => mockRepository.getCurrencies()).called(1);
-    verifyNoMoreInteractions(mockRepository);
-  });
+        expect(result, equals(const Right(tCurrencies)));
+        verify(() => mockRepository.getCurrencies()).called(1);
+        verifyNoMoreInteractions(mockRepository);
+      },
+    );
 
-  test('should return ServerFailure when repository fails', () async {
-    const tFailure = ServerFailure(message: 'Server error');
-    when(() => mockRepository.getCurrencies()).thenAnswer((_) async => const Left(tFailure));
+    test('should return ServerFailure when repository call fails', () async {
+      const tFailure = ServerFailure(message: 'Failed to fetch currencies');
+      when(
+        () => mockRepository.getCurrencies(),
+      ).thenAnswer((_) async => const Left(tFailure));
 
-    final result = await useCase(const NoParams());
+      final result = await usecase(const NoParams());
 
-    expect(result, const Left(tFailure));
-    verify(() => mockRepository.getCurrencies()).called(1);
-  });
+      expect(result, equals(const Left(tFailure)));
+      verify(() => mockRepository.getCurrencies()).called(1);
+    });
 
-  test('should return CacheFailure when cache fails', () async {
-    const tFailure = CacheFailure(message: 'Cache error');
-    when(() => mockRepository.getCurrencies()).thenAnswer((_) async => const Left(tFailure));
+    test('should return CacheFailure when cache operation fails', () async {
+      const tFailure = CacheFailure(message: 'Cache read failed');
+      when(
+        () => mockRepository.getCurrencies(),
+      ).thenAnswer((_) async => const Left(tFailure));
 
-    final result = await useCase(const NoParams());
+      final result = await usecase(const NoParams());
 
-    expect(result, const Left(tFailure));
+      expect(result, equals(const Left(tFailure)));
+    });
   });
 }

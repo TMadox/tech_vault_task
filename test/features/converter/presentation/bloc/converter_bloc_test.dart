@@ -9,17 +9,11 @@ import 'package:task_currency/features/converter/presentation/bloc/converter_blo
 import 'package:task_currency/features/converter/presentation/bloc/converter_event.dart';
 import 'package:task_currency/features/converter/presentation/bloc/converter_state.dart';
 
-class MockConvertCurrency extends Mock implements ConvertCurrency {}
-
-class FakeConvertCurrencyParams extends Fake implements ConvertCurrencyParams {}
+import '../../../../mocks.dart';
 
 void main() {
   late ConverterBloc bloc;
   late MockConvertCurrency mockConvertCurrency;
-
-  setUpAll(() {
-    registerFallbackValue(FakeConvertCurrencyParams());
-  });
 
   setUp(() {
     mockConvertCurrency = MockConvertCurrency();
@@ -30,51 +24,96 @@ void main() {
     bloc.close();
   });
 
-  test('initial state should be ConverterInitial', () {
-    expect(bloc.state, const ConverterInitial());
+  setUpAll(() {
+    registerFallbackValue(
+      const ConvertCurrencyParams(
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+        amount: 100.0,
+      ),
+    );
   });
 
-  const tFromCurrency = 'USD';
-  const tToCurrency = 'KWD';
-  const tAmount = 100.0;
-  const tRate = 0.307;
+  group('ConverterBloc', () {
+    const tFromCurrency = 'USD';
+    const tToCurrency = 'EUR';
+    const tAmount = 100.0;
+    const tRate = 0.85;
+    const tResult = 85.0;
 
-  const tConversionResult = ConversionResult(
-    fromCurrency: tFromCurrency,
-    toCurrency: tToCurrency,
-    amount: tAmount,
-    rate: tRate,
-    result: tAmount * tRate,
-  );
+    const tConversionResult = ConversionResult(
+      fromCurrency: tFromCurrency,
+      toCurrency: tToCurrency,
+      amount: tAmount,
+      rate: tRate,
+      result: tResult,
+    );
 
-  blocTest<ConverterBloc, ConverterState>(
-    'emits [ConverterLoading, ConverterSuccess] when ConvertCurrencyEvent is successful',
-    build: () {
-      when(() => mockConvertCurrency(any())).thenAnswer((_) async => const Right(tConversionResult));
-      return bloc;
-    },
-    act: (bloc) => bloc.add(const ConvertCurrencyEvent(fromCurrency: tFromCurrency, toCurrency: tToCurrency, amount: tAmount)),
-    expect: () => [const ConverterLoading(), const ConverterSuccess(result: tConversionResult)],
-    verify: (_) {
-      verify(() => mockConvertCurrency(any())).called(1);
-    },
-  );
+    test('initial state should be ConverterInitial', () {
+      expect(bloc.state, equals(const ConverterInitial()));
+    });
 
-  blocTest<ConverterBloc, ConverterState>(
-    'emits [ConverterLoading, ConverterError] when ConvertCurrencyEvent fails',
-    build: () {
-      when(() => mockConvertCurrency(any())).thenAnswer((_) async => const Left(ServerFailure(message: 'Conversion error')));
-      return bloc;
-    },
-    act: (bloc) => bloc.add(const ConvertCurrencyEvent(fromCurrency: tFromCurrency, toCurrency: tToCurrency, amount: tAmount)),
-    expect: () => [const ConverterLoading(), const ConverterError(message: 'Conversion error')],
-  );
+    blocTest<ConverterBloc, ConverterState>(
+      'emits [ConverterLoading, ConverterSuccess] when ConvertCurrencyEvent '
+      'is added and conversion succeeds',
+      build: () {
+        when(
+          () => mockConvertCurrency(any()),
+        ).thenAnswer((_) async => const Right(tConversionResult));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        const ConvertCurrencyEvent(
+          fromCurrency: tFromCurrency,
+          toCurrency: tToCurrency,
+          amount: tAmount,
+        ),
+      ),
+      expect: () => [
+        const ConverterLoading(),
+        const ConverterSuccess(result: tConversionResult),
+      ],
+      verify: (_) {
+        verify(
+          () => mockConvertCurrency(
+            const ConvertCurrencyParams(
+              fromCurrency: tFromCurrency,
+              toCurrency: tToCurrency,
+              amount: tAmount,
+            ),
+          ),
+        ).called(1);
+      },
+    );
 
-  blocTest<ConverterBloc, ConverterState>(
-    'emits [ConverterInitial] when ResetConverter is called',
-    build: () => bloc,
-    seed: () => const ConverterSuccess(result: tConversionResult),
-    act: (bloc) => bloc.add(const ResetConverter()),
-    expect: () => [const ConverterInitial()],
-  );
+    blocTest<ConverterBloc, ConverterState>(
+      'emits [ConverterLoading, ConverterError] when ConvertCurrencyEvent '
+      'is added and conversion fails',
+      build: () {
+        when(() => mockConvertCurrency(any())).thenAnswer(
+          (_) async => const Left(ServerFailure(message: 'Conversion failed')),
+        );
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        const ConvertCurrencyEvent(
+          fromCurrency: tFromCurrency,
+          toCurrency: tToCurrency,
+          amount: tAmount,
+        ),
+      ),
+      expect: () => [
+        const ConverterLoading(),
+        const ConverterError(message: 'Conversion failed'),
+      ],
+    );
+
+    blocTest<ConverterBloc, ConverterState>(
+      'emits [ConverterInitial] when ResetConverter is added',
+      build: () => bloc,
+      seed: () => const ConverterSuccess(result: tConversionResult),
+      act: (bloc) => bloc.add(const ResetConverter()),
+      expect: () => [const ConverterInitial()],
+    );
+  });
 }

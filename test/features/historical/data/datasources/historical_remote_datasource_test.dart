@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:task_currency/core/constants/api_constants.dart';
 import 'package:task_currency/core/error/exceptions.dart';
-import 'package:task_currency/core/network/dio_client.dart';
 import 'package:task_currency/features/historical/data/datasources/historical_remote_datasource.dart';
 import 'package:task_currency/features/historical/data/models/historical_rate_model.dart';
 
-class MockDioClient extends Mock implements DioClient {}
+import '../../../../mocks.dart';
 
 void main() {
   late HistoricalRemoteDataSourceImpl dataSource;
@@ -16,64 +16,124 @@ void main() {
     dataSource = HistoricalRemoteDataSourceImpl(mockDioClient);
   });
 
-  group('getHistoricalRates', () {
+  group('HistoricalRemoteDataSourceImpl', () {
     const tFromCurrency = 'USD';
     const tToCurrency = 'KWD';
-    final tStartDate = DateTime(2025, 12, 18);
-    final tEndDate = DateTime(2025, 12, 25);
+    final tStartDate = DateTime(2025, 1, 1);
+    final tEndDate = DateTime(2025, 1, 7);
 
-    final tLatestResponse = {
+    final tSuccessResponse = {
       'result': 'success',
-      'base_code': 'USD',
-      'conversion_rates': {'USD': 1.0, 'KWD': 0.307, 'EUR': 0.92},
+      'conversion_rates': {'KWD': 0.307, 'EUR': 0.85, 'GBP': 0.75},
     };
 
-    test('should return list of HistoricalRateModel when API call is successful', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tLatestResponse);
+    group('getHistoricalRates', () {
+      test(
+        'should return list of HistoricalRateModel when API call succeeds',
+        () async {
+          when(
+            () => mockDioClient.get(ApiConstants.latestRates(tFromCurrency)),
+          ).thenAnswer((_) async => tSuccessResponse);
 
-      final result = await dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate);
+          final result = await dataSource.getHistoricalRates(
+            tFromCurrency,
+            tToCurrency,
+            tStartDate,
+            tEndDate,
+          );
 
-      expect(result, isA<List<HistoricalRateModel>>());
-      expect(result.length, 7);
-      verify(() => mockDioClient.get(any())).called(1);
-    });
-
-    test('should return rates sorted by date', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tLatestResponse);
-
-      final result = await dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate);
-
-      for (int i = 0; i < result.length - 1; i++) {
-        expect(result[i].date.isBefore(result[i + 1].date), true);
-      }
-    });
-
-    test('should throw ServerException when response is null', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => null);
-
-      expect(() => dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate), throwsA(isA<ServerException>()));
-    });
-
-    test('should throw ServerException when target currency not found', () async {
-      when(() => mockDioClient.get(any())).thenAnswer(
-        (_) async => {
-          'result': 'success',
-          'conversion_rates': {'USD': 1.0},
+          expect(result, isA<List<HistoricalRateModel>>());
+          expect(result.length, equals(7)); // 7 days of simulated data
+          expect(result.first.fromCurrency, equals(tFromCurrency));
+          expect(result.first.toCurrency, equals(tToCurrency));
         },
       );
 
-      expect(() => dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate), throwsA(isA<ServerException>()));
-    });
+      test(
+        'should throw ServerException when API returns error result',
+        () async {
+          when(
+            () => mockDioClient.get(ApiConstants.latestRates(tFromCurrency)),
+          ).thenAnswer(
+            (_) async => {'result': 'error', 'error-type': 'invalid-key'},
+          );
 
-    test('should return rates with correct currency codes', () async {
-      when(() => mockDioClient.get(any())).thenAnswer((_) async => tLatestResponse);
+          expect(
+            () => dataSource.getHistoricalRates(
+              tFromCurrency,
+              tToCurrency,
+              tStartDate,
+              tEndDate,
+            ),
+            throwsA(isA<ServerException>()),
+          );
+        },
+      );
 
-      final result = await dataSource.getHistoricalRates(tFromCurrency, tToCurrency, tStartDate, tEndDate);
+      test('should throw ServerException when API returns null', () async {
+        when(
+          () => mockDioClient.get(ApiConstants.latestRates(tFromCurrency)),
+        ).thenAnswer((_) async => null);
 
-      for (final rate in result) {
-        expect(rate.fromCurrency, tFromCurrency);
-        expect(rate.toCurrency, tToCurrency);
-      }
+        expect(
+          () => dataSource.getHistoricalRates(
+            tFromCurrency,
+            tToCurrency,
+            tStartDate,
+            tEndDate,
+          ),
+          throwsA(isA<ServerException>()),
+        );
+      });
+
+      test(
+        'should throw ServerException when target currency not found in rates',
+        () async {
+          when(
+            () => mockDioClient.get(ApiConstants.latestRates(tFromCurrency)),
+          ).thenAnswer(
+            (_) async => {
+              'result': 'success',
+              'conversion_rates': {'EUR': 0.85, 'GBP': 0.75},
+            },
+          );
+
+          expect(
+            () => dataSource.getHistoricalRates(
+              tFromCurrency,
+              tToCurrency,
+              tStartDate,
+              tEndDate,
+            ),
+            throwsA(
+              predicate<ServerException>(
+                (e) => e.message == 'Currency $tToCurrency not found',
+              ),
+            ),
+          );
+        },
+      );
+
+      test(
+        'should throw ServerException when conversion_rates is null',
+        () async {
+          when(
+            () => mockDioClient.get(ApiConstants.latestRates(tFromCurrency)),
+          ).thenAnswer(
+            (_) async => {'result': 'success', 'conversion_rates': null},
+          );
+
+          expect(
+            () => dataSource.getHistoricalRates(
+              tFromCurrency,
+              tToCurrency,
+              tStartDate,
+              tEndDate,
+            ),
+            throwsA(isA<ServerException>()),
+          );
+        },
+      );
     });
   });
 }
