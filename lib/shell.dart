@@ -1,33 +1,26 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'features/converter/presentation/pages/converter_page.dart';
-import 'features/currencies/presentation/pages/currencies_page.dart';
-import 'features/historical/presentation/pages/historical_page.dart';
+class MainNavigation extends StatelessWidget {
+  const MainNavigation({super.key, required this.navigationShell});
 
-class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final StatefulNavigationShell navigationShell;
 
-  @override
-  State<MainNavigation> createState() => _MainNavigationState();
-}
-
-class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    ConverterPage(),
-    CurrenciesPage(),
-    HistoricalPage(),
-  ];
+  void _onTap(BuildContext context, int index) {
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) => _onTap(context, index),
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.currency_exchange_outlined),

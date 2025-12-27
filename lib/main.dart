@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
-import 'package:task_currency/shell.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/di/injection.dart';
+import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/converter/presentation/bloc/converter_bloc.dart';
 import 'features/currencies/presentation/bloc/currencies_bloc.dart';
@@ -37,7 +37,8 @@ class CurrencyConverterApp extends StatelessWidget {
         BlocProvider<HistoricalBloc>(create: (_) => getIt<HistoricalBloc>()),
         BlocProvider<ConverterBloc>(create: (_) => getIt<ConverterBloc>()),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
+        routerConfig: AppRouter.router,
         title: AppConstants.appName,
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
@@ -45,7 +46,6 @@ class CurrencyConverterApp extends StatelessWidget {
           ..addAll([FormBuilderLocalizations.delegate]),
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-        home: const MainNavigation(),
       ),
     );
   }
