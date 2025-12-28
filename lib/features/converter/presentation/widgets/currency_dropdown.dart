@@ -10,6 +10,7 @@ import '../../../currencies/domain/entities/currency.dart';
 class CurrencyDropdown extends StatelessWidget {
   final List<Currency> currencies;
   final String name;
+  final bool Function(Currency)? disabledItemFn;
   final ValueChanged<Currency?>? onChanged;
   final String label;
 
@@ -17,6 +18,7 @@ class CurrencyDropdown extends StatelessWidget {
     super.key,
     required this.currencies,
     required this.name,
+    this.disabledItemFn,
     this.onChanged,
     required this.label,
   });
@@ -50,6 +52,7 @@ class CurrencyDropdown extends StatelessWidget {
           ),
           popupProps: PopupProps.menu(
             showSearchBox: true,
+            disabledItemFn: disabledItemFn,
             searchFieldProps: TextFieldProps(
               decoration: InputDecoration(
                 hintText: 'converter.search_hint'.tr(),
@@ -58,8 +61,8 @@ class CurrencyDropdown extends StatelessWidget {
             ),
             itemBuilder: (context, currency, isDisabled, isSelected) => Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.defaultPadding,
                 vertical: AppConstants.smallPadding,
+                horizontal: AppConstants.defaultPadding,
               ),
               child: Row(
                 children: [
@@ -69,6 +72,16 @@ class CurrencyDropdown extends StatelessWidget {
                     child: Text(
                       '${currency.id} - ${currency.currencyName}',
                       overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        color: isDisabled
+                            ? context.colorScheme.onSurface.withValues(
+                                alpha: 0.38,
+                              )
+                            : isSelected
+                            ? context.colorScheme.primary
+                            : context.colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected ? FontWeight.bold : null,
+                      ),
                     ),
                   ),
                   if (isSelected) const Icon(Icons.check, size: 16),

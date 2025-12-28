@@ -21,7 +21,8 @@ class ConverterPage extends StatefulWidget {
 
 class _ConverterPageState extends State<ConverterPage> {
   final _formKey = GlobalKey<FormBuilderState>();
-
+  Currency? _fromCurrency;
+  Currency? _toCurrency;
   @override
   void initState() {
     super.initState();
@@ -64,15 +65,29 @@ class _ConverterPageState extends State<ConverterPage> {
           }
 
           if (currenciesState is CurrenciesLoaded) {
-            return ConverterFormContent(
-              formKey: _formKey,
-              onConvert: _convert,
-              onSwapCurrencies: _swapCurrencies,
-              currencies: currenciesState.currencies,
-              onFromCurrencyChanged: (currency) =>
-                  context.read<ConverterBloc>().add(const ResetConverter()),
-              onToCurrencyChanged: (currency) =>
-                  context.read<ConverterBloc>().add(const ResetConverter()),
+            return FormBuilder(
+              key: _formKey,
+              initialValue: {
+                //this just to make sure incase of state reset, that the values are to be synced correctly.
+                'from_currency': _fromCurrency,
+                'to_currency': _toCurrency,
+              },
+              child: ConverterFormContent(
+                canSwap: _fromCurrency != null && _toCurrency != null,
+                onConvert: _convert,
+                onSwapCurrencies: _swapCurrencies,
+                currencies: currenciesState.currencies,
+                disableFrom: (currency) => currency.id == _toCurrency?.id,
+                disableTo: (currency) => currency.id == _fromCurrency?.id,
+                onFromCurrencyChanged: (currency) {
+                  setState(() => _fromCurrency = currency);
+                  context.read<ConverterBloc>().add(const ResetConverter());
+                },
+                onToCurrencyChanged: (currency) {
+                  setState(() => _toCurrency = currency);
+                  context.read<ConverterBloc>().add(const ResetConverter());
+                },
+              ),
             );
           }
           return const SizedBox.shrink();
@@ -82,14 +97,13 @@ class _ConverterPageState extends State<ConverterPage> {
   }
 
   void _swapCurrencies() {
-    _formKey.currentState!.save();
-    final currencyFrom = _formKey.currentState!.value['from_currency'];
-    final currencyTo = _formKey.currentState!.value['to_currency'];
-    _formKey.currentState!.patchValue({
-      'from_currency': currencyTo,
-      'to_currency': currencyFrom,
-    });
-    context.read<ConverterBloc>().add(const ResetConverter());
+    if (_fromCurrency != null && _toCurrency != null) {
+      _formKey.currentState!.patchValue({
+        'from_currency': _toCurrency,
+        'to_currency': _fromCurrency,
+      });
+      context.read<ConverterBloc>().add(const ResetConverter());
+    }
   }
 
   void _convert() {

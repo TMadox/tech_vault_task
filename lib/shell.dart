@@ -7,12 +7,10 @@ class MainNavigation extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  void _onTap(BuildContext context, int index) {
-    navigationShell.goBranch(
-      index,
-      initialLocation: index == navigationShell.currentIndex,
-    );
-  }
+  void _onTap(BuildContext context, int index) => navigationShell.goBranch(
+    index,
+    initialLocation: index == navigationShell.currentIndex,
+  );
 
   @override
   Widget build(BuildContext context) {
